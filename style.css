@@ -69,6 +69,9 @@ footer p {
 }
 
 .team-member {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
     margin-top: 2rem;
 }
 
@@ -83,20 +86,45 @@ footer p {
     color: #666;
 }
 
-@media (max-width: 768px) {
-    .section {
-        padding: 1rem;
-        min-height: auto;
-        margin: 2rem 0;
-    }
+.profile-image {
+    flex-shrink: 0;
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
 
-    .section h2 {
-        font-size: 2rem;
-    }
+.profile-image::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+    box-sizing: border-box;
+}
 
-    .section p {
-        font-size: 1.1rem;
-    }
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    flex-grow: 1;
+}
+
+.profile-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.profile-info p {
+    font-size: 1.1rem;
+    color: #666;
 }
 
 .logo img {
@@ -106,6 +134,15 @@ footer p {
     display: flex;
     align-items: center;
     gap: 10px; /* Adds space between the logo and text */
+}
+.logo-link {
+    text-decoration: none; /* Removes underline from link */
+    color: inherit; /* Maintains original text color */
+    display: block; /* Ensures the link takes up the full space */
+}
+
+.logo-link:hover {
+    color: inherit; /* Maintains original text color on hover */
 }
 .hamburger-menu {
     display: none;
@@ -132,6 +169,8 @@ nav {
     display: flex;
     align-items: center;
     gap: 2rem;
+    /* Update your existing nav styles with this additional property */
+    transition: right 0.3s ease-in-out;
 }
 
 .menu {
@@ -194,6 +233,13 @@ nav {
         margin: 10px 0;
     }
 
+    .menu a,
+    .contact-btn {
+        /* Add to your existing styles */
+        display: inline-block;
+        transition: color 0.3s ease;
+    }
+
     .contact-btn {
         margin: 20px 0;
     }
@@ -213,5 +259,15 @@ nav {
 
     .hamburger-menu:checked ~ .menu-icon span:nth-child(3) {
         transform: rotate(45deg) translate(-5px, -6px);
+    }
+    .team-member {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .profile-image {
+        width: 150px;
+        height: 150px;
     }
 }

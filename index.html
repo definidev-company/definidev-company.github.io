@@ -10,10 +10,12 @@
     </head>
     <body>
         <header>
-            <div class="logo">
-                <img src="definidev-logo.png" alt="Definidev Logo" />
-                <span class="biz-name">Definidev</span>
-            </div>
+            <a href="/" class="logo-link">
+                <div class="logo">
+                    <img src="definidev-logo.png" alt="Definidev Logo" />
+                    <span class="biz-name">Definidev</span>
+                </div>
+            </a>
             <input type="checkbox" id="hamburger" class="hamburger-menu" />
             <label for="hamburger" class="menu-icon">
                 <span></span>
@@ -48,9 +50,12 @@
                     <h2>Our work</h2>
                     <p>We have industry experience building:</p>
                     <ul>
-                        <li>Distributed systems</li>
+                        <li>Distributed systems using Kubernetes</li>
                         <li>AI infrastructure</li>
-                        <li>Process automation</li>
+                        <li>
+                            GPU-accelerated NVIDIA CUDA™️ programming in C++
+                        </li>
+                        <li>Process automation using custom software</li>
                         <li>Operational restructuring</li>
                     </ul>
                 </div>
@@ -60,8 +65,13 @@
                 <div class="container">
                     <h2>Our team</h2>
                     <div class="team-member">
-                        <h3>Tobi Lehman</h3>
-                        <p>CEO/Founder</p>
+                        <div class="profile-image">
+                            <img src="tobi-lehman.jpeg" alt="Tobi Lehman" />
+                        </div>
+                        <div class="profile-info">
+                            <h3>Tobi Lehman</h3>
+                            <p>CEO/Founder</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -69,5 +79,28 @@
         <footer>
             <p>&copy; Definidev, LLC 2025</p>
         </footer>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Get the hamburger checkbox and all menu links
+                const hamburger = document.getElementById("hamburger");
+                const menuLinks = document.querySelectorAll(
+                    ".menu a, .contact-btn",
+                );
+
+                // Add click event listener to all menu links
+                menuLinks.forEach((link) => {
+                    link.addEventListener("click", () => {
+                        // If we're in mobile view (hamburger is visible)
+                        if (
+                            window.getComputedStyle(
+                                document.querySelector(".menu-icon"),
+                            ).display !== "none"
+                        ) {
+                            hamburger.checked = false; // Uncheck the hamburger menu
+                        }
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
