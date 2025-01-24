@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Contact - Definidev, LLC</title>
+        <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+        <link rel="stylesheet" href="style.css" />
+        <style>
+            .contact-options {
+                max-width: 600px;
+                margin: 2rem auto;
+            }
+
+            .contact-option {
+                margin-bottom: 2rem;
+                padding: 1rem;
+                border-radius: 8px;
+                background-color: #f5f5f5;
+            }
+
+            .contact-option h3 {
+                margin-bottom: 0.5rem;
+                color: #333;
+            }
+
+            .contact-option a {
+                color: #0066cc;
+                text-decoration: none;
+                font-size: 1.1rem;
+            }
+
+            .contact-option a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <a href="/" class="logo-link">
+                <div class="logo">
+                    <img src="definidev-logo.png" alt="Definidev Logo" />
+                    <span class="biz-name">Definidev</span>
+                </div>
+            </a>
+            <input type="checkbox" id="hamburger" class="hamburger-menu" />
+            <label for="hamburger" class="menu-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            <nav>
+                <ul class="menu">
+                    <li><a href="index.html#what-we-do">What we do</a></li>
+                    <li><a href="index.html#our-work">Our work</a></li>
+                    <li><a href="index.html#our-team">Our team</a></li>
+                </ul>
+                <a href="contact.html" class="contact-btn">Contact</a>
+            </nav>
+        </header>
+        <main>
+            <section class="section">
+                <div class="container">
+                    <h2>Contact Us</h2>
+                    <div class="contact-options">
+                        <div class="contact-option">
+                            <h3>Email</h3>
+                            <a href="mailto:tobi@defini.dev">tobi@defini.dev</a>
+                        </div>
+                        <div class="contact-option">
+                            <h3>Social Media</h3>
+                            <a
+                                href="https://x.com/definidev/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Follow us on 𝕏 (Twitter)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; Definidev, LLC 2025</p>
+        </footer>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const hamburger = document.getElementById("hamburger");
+                const menuLinks = document.querySelectorAll(
+                    ".menu a, .contact-btn",
+                );
+
+                menuLinks.forEach((link) => {
+                    link.addEventListener("click", () => {
+                        if (
+                            window.getComputedStyle(
+                                document.querySelector(".menu-icon"),
+                            ).display !== "none"
+                        ) {
+                            hamburger.checked = false;
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
