@@ -1,308 +1,624 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-<head>
-<!-- 2025-01-26 Sun 19:55 -->
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GPU matrix multiplication: a literate CUDA program</title>
-<meta name="author" content="Tobi Lehman" />
-<meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
+    <head>
+        <link rel="stylesheet" href="/style.css" />
+        <!-- 2025-01-26 Sun 19:55 -->
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GPU matrix multiplication: a literate CUDA program</title>
+        <meta name="author" content="Tobi Lehman" />
+        <meta name="generator" content="Org Mode" />
+        <style>
+            #content {
+                max-width: 60em;
+                margin: auto;
+            }
+            .title {
+                text-align: center;
+                margin-bottom: 0.2em;
+            }
+            .subtitle {
+                text-align: center;
+                font-size: medium;
+                font-weight: bold;
+                margin-top: 0;
+            }
+            .todo {
+                font-family: monospace;
+                color: red;
+            }
+            .done {
+                font-family: monospace;
+                color: green;
+            }
+            .priority {
+                font-family: monospace;
+                color: orange;
+            }
+            .tag {
+                background-color: #eee;
+                font-family: monospace;
+                padding: 2px;
+                font-size: 80%;
+                font-weight: normal;
+            }
+            .timestamp {
+                color: #bebebe;
+            }
+            .timestamp-kwd {
+                color: #5f9ea0;
+            }
+            .org-right {
+                margin-left: auto;
+                margin-right: 0px;
+                text-align: right;
+            }
+            .org-left {
+                margin-left: 0px;
+                margin-right: auto;
+                text-align: left;
+            }
+            .org-center {
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+            }
+            .underline {
+                text-decoration: underline;
+            }
+            #postamble p,
+            #preamble p {
+                font-size: 90%;
+                margin: 0.2em;
+            }
+            p.verse {
+                margin-left: 3%;
+            }
+            pre {
+                border: 1px solid #e6e6e6;
+                border-radius: 3px;
+                background-color: #f2f2f2;
+                padding: 8pt;
+                font-family: monospace;
+                overflow: auto;
+                margin: 1.2em;
+            }
+            pre.src {
+                position: relative;
+                overflow: auto;
+            }
+            pre.src:before {
+                display: none;
+                position: absolute;
+                top: -8px;
+                right: 12px;
+                padding: 3px;
+                color: #555;
+                background-color: #f2f2f299;
+            }
+            pre.src:hover:before {
+                display: inline;
+                margin-top: 14px;
+            }
+            /* Languages per Org manual */
+            pre.src-asymptote:before {
+                content: "Asymptote";
+            }
+            pre.src-awk:before {
+                content: "Awk";
+            }
+            pre.src-authinfo::before {
+                content: "Authinfo";
+            }
+            pre.src-C:before {
+                content: "C";
+            }
+            /* pre.src-C++ doesn't work in CSS */
+            pre.src-clojure:before {
+                content: "Clojure";
+            }
+            pre.src-css:before {
+                content: "CSS";
+            }
+            pre.src-D:before {
+                content: "D";
+            }
+            pre.src-ditaa:before {
+                content: "ditaa";
+            }
+            pre.src-dot:before {
+                content: "Graphviz";
+            }
+            pre.src-calc:before {
+                content: "Emacs Calc";
+            }
+            pre.src-emacs-lisp:before {
+                content: "Emacs Lisp";
+            }
+            pre.src-fortran:before {
+                content: "Fortran";
+            }
+            pre.src-gnuplot:before {
+                content: "gnuplot";
+            }
+            pre.src-haskell:before {
+                content: "Haskell";
+            }
+            pre.src-hledger:before {
+                content: "hledger";
+            }
+            pre.src-java:before {
+                content: "Java";
+            }
+            pre.src-js:before {
+                content: "Javascript";
+            }
+            pre.src-latex:before {
+                content: "LaTeX";
+            }
+            pre.src-ledger:before {
+                content: "Ledger";
+            }
+            pre.src-lisp:before {
+                content: "Lisp";
+            }
+            pre.src-lilypond:before {
+                content: "Lilypond";
+            }
+            pre.src-lua:before {
+                content: "Lua";
+            }
+            pre.src-matlab:before {
+                content: "MATLAB";
+            }
+            pre.src-mscgen:before {
+                content: "Mscgen";
+            }
+            pre.src-ocaml:before {
+                content: "Objective Caml";
+            }
+            pre.src-octave:before {
+                content: "Octave";
+            }
+            pre.src-org:before {
+                content: "Org mode";
+            }
+            pre.src-oz:before {
+                content: "OZ";
+            }
+            pre.src-plantuml:before {
+                content: "Plantuml";
+            }
+            pre.src-processing:before {
+                content: "Processing.js";
+            }
+            pre.src-python:before {
+                content: "Python";
+            }
+            pre.src-R:before {
+                content: "R";
+            }
+            pre.src-ruby:before {
+                content: "Ruby";
+            }
+            pre.src-sass:before {
+                content: "Sass";
+            }
+            pre.src-scheme:before {
+                content: "Scheme";
+            }
+            pre.src-screen:before {
+                content: "Gnu Screen";
+            }
+            pre.src-sed:before {
+                content: "Sed";
+            }
+            pre.src-sh:before {
+                content: "shell";
+            }
+            pre.src-sql:before {
+                content: "SQL";
+            }
+            pre.src-sqlite:before {
+                content: "SQLite";
+            }
+            /* additional languages in org.el's org-babel-load-languages alist */
+            pre.src-forth:before {
+                content: "Forth";
+            }
+            pre.src-io:before {
+                content: "IO";
+            }
+            pre.src-J:before {
+                content: "J";
+            }
+            pre.src-makefile:before {
+                content: "Makefile";
+            }
+            pre.src-maxima:before {
+                content: "Maxima";
+            }
+            pre.src-perl:before {
+                content: "Perl";
+            }
+            pre.src-picolisp:before {
+                content: "Pico Lisp";
+            }
+            pre.src-scala:before {
+                content: "Scala";
+            }
+            pre.src-shell:before {
+                content: "Shell Script";
+            }
+            pre.src-ebnf2ps:before {
+                content: "ebfn2ps";
+            }
+            /* additional language identifiers per "defun org-babel-execute"
        in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
+            pre.src-cpp:before {
+                content: "C++";
+            }
+            pre.src-abc:before {
+                content: "ABC";
+            }
+            pre.src-coq:before {
+                content: "Coq";
+            }
+            pre.src-groovy:before {
+                content: "Groovy";
+            }
+            /* additional language identifiers from org-babel-shell-names in
      ob-shell.el: ob-shell is the only babel language using a lambda to put
      the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
+            pre.src-bash:before {
+                content: "bash";
+            }
+            pre.src-csh:before {
+                content: "csh";
+            }
+            pre.src-ash:before {
+                content: "ash";
+            }
+            pre.src-dash:before {
+                content: "dash";
+            }
+            pre.src-ksh:before {
+                content: "ksh";
+            }
+            pre.src-mksh:before {
+                content: "mksh";
+            }
+            pre.src-posh:before {
+                content: "posh";
+            }
+            /* Additional Emacs modes also supported by the LaTeX listings package */
+            pre.src-ada:before {
+                content: "Ada";
+            }
+            pre.src-asm:before {
+                content: "Assembler";
+            }
+            pre.src-caml:before {
+                content: "Caml";
+            }
+            pre.src-delphi:before {
+                content: "Delphi";
+            }
+            pre.src-html:before {
+                content: "HTML";
+            }
+            pre.src-idl:before {
+                content: "IDL";
+            }
+            pre.src-mercury:before {
+                content: "Mercury";
+            }
+            pre.src-metapost:before {
+                content: "MetaPost";
+            }
+            pre.src-modula-2:before {
+                content: "Modula-2";
+            }
+            pre.src-pascal:before {
+                content: "Pascal";
+            }
+            pre.src-ps:before {
+                content: "PostScript";
+            }
+            pre.src-prolog:before {
+                content: "Prolog";
+            }
+            pre.src-simula:before {
+                content: "Simula";
+            }
+            pre.src-tcl:before {
+                content: "tcl";
+            }
+            pre.src-tex:before {
+                content: "TeX";
+            }
+            pre.src-plain-tex:before {
+                content: "Plain TeX";
+            }
+            pre.src-verilog:before {
+                content: "Verilog";
+            }
+            pre.src-vhdl:before {
+                content: "VHDL";
+            }
+            pre.src-xml:before {
+                content: "XML";
+            }
+            pre.src-nxml:before {
+                content: "XML";
+            }
+            /* add a generic configuration mode; LaTeX export needs an additional
      (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
+            pre.src-conf:before {
+                content: "Configuration File";
+            }
 
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
-<script>
-  window.MathJax = {
-    tex: {
-      ams: {
-        multlineWidth: '85%'
-      },
-      tags: 'ams',
-      tagSide: 'right',
-      tagIndent: '.8em'
-    },
-    chtml: {
-      scale: 1.0,
-      displayAlign: 'center',
-      displayIndent: '0em'
-    },
-    svg: {
-      scale: 1.0,
-      displayAlign: 'center',
-      displayIndent: '0em'
-    },
-    output: {
-      font: 'mathjax-modern',
-      displayOverflow: 'overflow'
-    }
-  };
-</script>
+            table {
+                border-collapse: collapse;
+            }
+            caption.t-above {
+                caption-side: top;
+            }
+            caption.t-bottom {
+                caption-side: bottom;
+            }
+            td,
+            th {
+                vertical-align: top;
+            }
+            th.org-right {
+                text-align: center;
+            }
+            th.org-left {
+                text-align: center;
+            }
+            th.org-center {
+                text-align: center;
+            }
+            td.org-right {
+                text-align: right;
+            }
+            td.org-left {
+                text-align: left;
+            }
+            td.org-center {
+                text-align: center;
+            }
+            dt {
+                font-weight: bold;
+            }
+            .footpara {
+                display: inline;
+            }
+            .footdef {
+                margin-bottom: 1em;
+            }
+            .figure {
+                padding: 1em;
+            }
+            .figure p {
+                text-align: center;
+            }
+            .equation-container {
+                display: table;
+                text-align: center;
+                width: 100%;
+            }
+            .equation {
+                vertical-align: middle;
+            }
+            .equation-label {
+                display: table-cell;
+                text-align: right;
+                vertical-align: middle;
+            }
+            .inlinetask {
+                padding: 10px;
+                border: 2px solid gray;
+                margin: 10px;
+                background: #ffffcc;
+            }
+            #org-div-home-and-up {
+                text-align: right;
+                font-size: 70%;
+                white-space: nowrap;
+            }
+            textarea {
+                overflow-x: auto;
+            }
+            .linenr {
+                font-size: smaller;
+            }
+            .code-highlighted {
+                background-color: #ffff00;
+            }
+            .org-info-js_info-navigation {
+                border-style: none;
+            }
+            #org-info-js_console-label {
+                font-size: 10px;
+                font-weight: bold;
+                white-space: nowrap;
+            }
+            .org-info-js_search-highlight {
+                background-color: #ffff00;
+                color: #000000;
+                font-weight: bold;
+            }
+            .org-svg {
+            }
+        </style>
+        <script>
+            window.MathJax = {
+                tex: {
+                    ams: {
+                        multlineWidth: "85%",
+                    },
+                    tags: "ams",
+                    tagSide: "right",
+                    tagIndent: ".8em",
+                },
+                chtml: {
+                    scale: 1.0,
+                    displayAlign: "center",
+                    displayIndent: "0em",
+                },
+                svg: {
+                    scale: 1.0,
+                    displayAlign: "center",
+                    displayIndent: "0em",
+                },
+                output: {
+                    font: "mathjax-modern",
+                    displayOverflow: "overflow",
+                },
+            };
+        </script>
 
-<script
-  id="MathJax-script"
-  async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-</head>
-<body>
-<div id="content" class="content">
-<h1 class="title">GPU matrix multiplication: a literate CUDA program</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#orge83dd49">1. Mathematical preliminaries</a></li>
-<li><a href="#orgf8f8d3b">2. The inner loop of matrix multiplication</a></li>
-<li><a href="#orgb1cd67d">3. The full function to multiply \(A\) and \(B\) on the CPU</a></li>
-<li><a href="#org4c3b617">4. The full function to multiply \(A\) and \(B\) on the GPU</a></li>
-<li><a href="#org12d9370">5. The call site for <code>matrixMultiplyKernel</code></a></li>
-<li><a href="#org2d325b0">6. The <code>main</code> entry point</a></li>
-<li><a href="#org6eee941">7. Results</a></li>
-<li><a href="#orgf335919">8. Appendix</a>
-<ul>
-<li><a href="#orgf06278e">8.1. Imports</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-<p>
-This is a <a href="https://en.wikipedia.org/wiki/Literate_programming">literate program</a> that implements matrix multiplication in C++ using
-NVIDIA CUDA to accelerate the computation. I tested this on an NVIDIA GeForce 1060, as
-well as a GeForce 1660. The speedup is about 1000x.
-</p>
+        <script
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        ></script>
+    </head>
+    <body>
+        <div id="content" class="content">
+            <h1 class="title">
+                GPU matrix multiplication: a literate CUDA program
+            </h1>
+            <div id="table-of-contents" role="doc-toc">
+                <h2>Table of Contents</h2>
+                <div id="text-table-of-contents" role="doc-toc">
+                    <ul>
+                        <li>
+                            <a href="#orge83dd49"
+                                >1. Mathematical preliminaries</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#orgf8f8d3b"
+                                >2. The inner loop of matrix multiplication</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#orgb1cd67d"
+                                >3. The full function to multiply \(A\) and
+                                \(B\) on the CPU</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#org4c3b617"
+                                >4. The full function to multiply \(A\) and
+                                \(B\) on the GPU</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#org12d9370"
+                                >5. The call site for
+                                <code>matrixMultiplyKernel</code></a
+                            >
+                        </li>
+                        <li>
+                            <a href="#org2d325b0"
+                                >6. The <code>main</code> entry point</a
+                            >
+                        </li>
+                        <li><a href="#org6eee941">7. Results</a></li>
+                        <li>
+                            <a href="#orgf335919">8. Appendix</a>
+                            <ul>
+                                <li><a href="#orgf06278e">8.1. Imports</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <p>
+                This is a
+                <a href="https://en.wikipedia.org/wiki/Literate_programming"
+                    >literate program</a
+                >
+                that implements matrix multiplication in C++ using NVIDIA CUDA
+                to accelerate the computation. I tested this on an NVIDIA
+                GeForce 1060, as well as a GeForce 1660. The speedup is about
+                1000x.
+            </p>
 
-<div id="outline-container-orge83dd49" class="outline-2">
-<h2 id="orge83dd49"><span class="section-number-2">1.</span> Mathematical preliminaries</h2>
-<div class="outline-text-2" id="text-1">
-<p>
-An \(n\times n\) matrix \(A\) implements a linear function: \(A : \mathbb{R}^n \to \mathbb{R}^n\).
-</p>
+            <div id="outline-container-orge83dd49" class="outline-2">
+                <h2 id="orge83dd49">
+                    <span class="section-number-2">1.</span> Mathematical
+                    preliminaries
+                </h2>
+                <div class="outline-text-2" id="text-1">
+                    <p>
+                        An \(n\times n\) matrix \(A\) implements a linear
+                        function: \(A : \mathbb{R}^n \to \mathbb{R}^n\).
+                    </p>
 
-<p>
-Given two \(n\times n\) matrices \(A\) and \(B\), we can compute \(C = AB\) using this component-wise formula:
-</p>
+                    <p>
+                        Given two \(n\times n\) matrices \(A\) and \(B\), we can
+                        compute \(C = AB\) using this component-wise formula:
+                    </p>
 
-<p>
-\[ C_{ij} = \sum_{k=1}^n A_{ik}B_{kj} \]
-</p>
+                    <p>\[ C_{ij} = \sum_{k=1}^n A_{ik}B_{kj} \]</p>
 
-<p>
-The straightforward way to implement this in C++ is to represent the \(A\) an array of <code>float</code> values
-of size <code>n*n</code>, then the mapping from \((i,j)\) to the index is just \(in + j\).
-</p>
-</div>
-</div>
+                    <p>
+                        The straightforward way to implement this in C++ is to
+                        represent the \(A\) an array of
+                        <code>float</code> values of size <code>n*n</code>, then
+                        the mapping from \((i,j)\) to the index is just \(in +
+                        j\).
+                    </p>
+                </div>
+            </div>
 
-<div id="outline-container-orgf8f8d3b" class="outline-2">
-<h2 id="orgf8f8d3b"><span class="section-number-2">2.</span> The inner loop of matrix multiplication</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-To calculate \(C_{ij} = \sum_{k=1}^n A_{ik}B_{kj}\), we start with the inner loop:
-</p>
+            <div id="outline-container-orgf8f8d3b" class="outline-2">
+                <h2 id="orgf8f8d3b">
+                    <span class="section-number-2">2.</span> The inner loop of
+                    matrix multiplication
+                </h2>
+                <div class="outline-text-2" id="text-2">
+                    <p>
+                        To calculate \(C_{ij} = \sum_{k=1}^n A_{ik}B_{kj}\), we
+                        start with the inner loop:
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp" id="org6eb74c3"><span style="color: #cd7542;">float</span> <span style="color: #baba36;">sum</span> = 0.0f;
+                    <div class="org-src-container">
+                        <pre
+                            class="src src-cpp"
+                            id="org6eb74c3"
+                        ><span style="color: #cd7542;">float</span> <span style="color: #baba36;">sum</span> = 0.0f;
 <span style="color: #5180b3;">for</span> (<span style="color: #cd7542;">int</span> <span style="color: #baba36;">k</span> = 0; k &lt; n; k++) {
   sum += A[i * n + k] * B[k * n + j];
 }
 C[i * n + j] = sum;
 </pre>
-</div>
-</div>
-</div>
+                    </div>
+                </div>
+            </div>
 
-<div id="outline-container-orgb1cd67d" class="outline-2">
-<h2 id="orgb1cd67d"><span class="section-number-2">3.</span> The full function to multiply \(A\) and \(B\) on the CPU</h2>
-<div class="outline-text-2" id="text-3">
-<p>
-To complete the CPU function, we just need to sum over <code>i</code> and <code>j</code>.
-</p>
+            <div id="outline-container-orgb1cd67d" class="outline-2">
+                <h2 id="orgb1cd67d">
+                    <span class="section-number-2">3.</span> The full function
+                    to multiply \(A\) and \(B\) on the CPU
+                </h2>
+                <div class="outline-text-2" id="text-3">
+                    <p>
+                        To complete the CPU function, we just need to sum over
+                        <code>i</code> and <code>j</code>.
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp" id="org5b7e590"><span style="color: #656565;">// </span><span style="color: #757575;">CPU matrix multiplication</span>
+                    <div class="org-src-container">
+                        <pre
+                            class="src src-cpp"
+                            id="org5b7e590"
+                        ><span style="color: #656565;">// </span><span style="color: #757575;">CPU matrix multiplication</span>
 <span style="color: #cd7542;">void</span> <span style="color: #6aaf50;">matrixMultiplyCPU</span>(<span style="color: #cd7542;">float</span>* <span style="color: #baba36;">A</span>, <span style="color: #cd7542;">float</span>* <span style="color: #baba36;">B</span>, <span style="color: #cd7542;">float</span>* <span style="color: #baba36;">C</span>, <span style="color: #cd7542;">int</span> <span style="color: #baba36;">n</span>) {
   <span style="color: #5180b3;">for</span> (<span style="color: #cd7542;">int</span> <span style="color: #baba36;">i</span> = 0; i &lt; n; i++) {
     <span style="color: #5180b3;">for</span> (<span style="color: #cd7542;">int</span> <span style="color: #baba36;">j</span> = 0; j &lt; n; j++) {
@@ -311,24 +627,32 @@ To complete the CPU function, we just need to sum over <code>i</code> and <code>
   }
 }
 </pre>
-</div>
-</div>
-</div>
+                    </div>
+                </div>
+            </div>
 
-<div id="outline-container-org4c3b617" class="outline-2">
-<h2 id="org4c3b617"><span class="section-number-2">4.</span> The full function to multiply \(A\) and \(B\) on the GPU</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-NVIDIA CUDA provides a framework to run a bunch of copies of a function on GPU cores.
-</p>
+            <div id="outline-container-org4c3b617" class="outline-2">
+                <h2 id="org4c3b617">
+                    <span class="section-number-2">4.</span> The full function
+                    to multiply \(A\) and \(B\) on the GPU
+                </h2>
+                <div class="outline-text-2" id="text-4">
+                    <p>
+                        NVIDIA CUDA provides a framework to run a bunch of
+                        copies of a function on GPU cores.
+                    </p>
 
-<p>
-The CUDA framework allows for 2D programming, notice the <code>.x</code> and <code>.y</code> values, those
-span a 2D \((x,y)\) plane. 
-</p>
+                    <p>
+                        The CUDA framework allows for 2D programming, notice the
+                        <code>.x</code> and <code>.y</code> values, those span a
+                        2D \((x,y)\) plane.
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp" id="org100f004"><span style="color: #656565;">// </span><span style="color: #757575;">CUDA kernel for matrix multiplication</span>
+                    <div class="org-src-container">
+                        <pre
+                            class="src src-cpp"
+                            id="org100f004"
+                        ><span style="color: #656565;">// </span><span style="color: #757575;">CUDA kernel for matrix multiplication</span>
 __global__ <span style="color: #cd7542;">void</span> <span style="color: #6aaf50;">matrixMultiplyKernel</span>(<span style="color: #cd7542;">float</span>* <span style="color: #baba36;">A</span>, <span style="color: #cd7542;">float</span>* <span style="color: #baba36;">B</span>, <span style="color: #cd7542;">float</span>* <span style="color: #baba36;">C</span>, <span style="color: #cd7542;">int</span> <span style="color: #baba36;">n</span>) {
     <span style="color: #cd7542;">int</span> <span style="color: #baba36;">row</span> = blockIdx.y * blockDim.y + threadIdx.y;
     <span style="color: #cd7542;">int</span> <span style="color: #baba36;">col</span> = blockIdx.x * blockDim.x + threadIdx.x;
@@ -339,62 +663,80 @@ __global__ <span style="color: #cd7542;">void</span> <span style="color: #6aaf50
     }
 }
 </pre>
-</div>
+                    </div>
 
-<p>
-To understand how we allocate this \((x,y)\) plane on the CUDA device, let's go up to the call
-site where <code>matrixMultiplyKernel</code> is called:
-</p>
+                    <p>
+                        To understand how we allocate this \((x,y)\) plane on
+                        the CUDA device, let's go up to the call site where
+                        <code>matrixMultiplyKernel</code> is called:
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp">matrixMultiplyKernel&lt;&lt;&lt;gridDim, blockDim&gt;&gt;&gt;(d_A, d_B, d_C, N);
-</pre>
-</div>
-</div>
-</div>
+                    <div class="org-src-container">
+                        <pre class="src src-cpp">
+matrixMultiplyKernel&lt;&lt;&lt;gridDim, blockDim&gt;&gt;&gt;(d_A, d_B, d_C, N);
+</pre
+                        >
+                    </div>
+                </div>
+            </div>
 
-<div id="outline-container-org12d9370" class="outline-2">
-<h2 id="org12d9370"><span class="section-number-2">5.</span> The call site for <code>matrixMultiplyKernel</code></h2>
-<div class="outline-text-2" id="text-5">
-<p>
-When you call a CUDA Kernel in C++, you have to specify the grid dimension and the block dimension.
-The grid dimension defines the number of "thread blocks" to run across the GPU device. The block dimension
-defines the number of threads that can run inside each thread block.
-</p>
+            <div id="outline-container-org12d9370" class="outline-2">
+                <h2 id="org12d9370">
+                    <span class="section-number-2">5.</span> The call site for
+                    <code>matrixMultiplyKernel</code>
+                </h2>
+                <div class="outline-text-2" id="text-5">
+                    <p>
+                        When you call a CUDA Kernel in C++, you have to specify
+                        the grid dimension and the block dimension. The grid
+                        dimension defines the number of "thread blocks" to run
+                        across the GPU device. The block dimension defines the
+                        number of threads that can run inside each thread block.
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp" id="org4a6d1a2">matrixMultiplyKernel&lt;&lt;&lt;gridDim, blockDim&gt;&gt;&gt;(d_A, d_B, d_C, N);
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org2d325b0" class="outline-2">
-<h2 id="org2d325b0"><span class="section-number-2">6.</span> The <code>main</code> entry point</h2>
-<div class="outline-text-2" id="text-6">
-<p>
-In CUDA there's a dichotomy between <b><b>host memory</b></b> (allocated with <code>new</code> and <code>malloc</code>) and <b><b>device memory</b></b>, which is
-on the GPU (allocated with <code>cudaMalloc</code>).
-</p>
+                    <div class="org-src-container">
+                        <pre class="src src-cpp" id="org4a6d1a2">
+matrixMultiplyKernel&lt;&lt;&lt;gridDim, blockDim&gt;&gt;&gt;(d_A, d_B, d_C, N);
+</pre
+                        >
+                    </div>
+                </div>
+            </div>
+            <div id="outline-container-org2d325b0" class="outline-2">
+                <h2 id="org2d325b0">
+                    <span class="section-number-2">6.</span> The
+                    <code>main</code> entry point
+                </h2>
+                <div class="outline-text-2" id="text-6">
+                    <p>
+                        In CUDA there's a dichotomy between
+                        <b><b>host memory</b></b> (allocated with
+                        <code>new</code> and <code>malloc</code>) and
+                        <b><b>device memory</b></b
+                        >, which is on the GPU (allocated with
+                        <code>cudaMalloc</code>).
+                    </p>
 
-<p>
-The basic flow of a CUDA C/C++ program is:
-</p>
+                    <p>The basic flow of a CUDA C/C++ program is:</p>
 
-<ul class="org-ul">
-<li>allocate your host memory</li>
-<li>allocate your device memory</li>
-<li>copy the data to host memory</li>
-<li>copy the data to device memory</li>
-<li>run CUDA kernels on the device</li>
-<li>copy the results back to the host</li>
-</ul>
+                    <ul class="org-ul">
+                        <li>allocate your host memory</li>
+                        <li>allocate your device memory</li>
+                        <li>copy the data to host memory</li>
+                        <li>copy the data to device memory</li>
+                        <li>run CUDA kernels on the device</li>
+                        <li>copy the results back to the host</li>
+                    </ul>
 
-<p>
-Now here's the main function for this matrix multiplication example, with some timing code 
-</p>
+                    <p>
+                        Now here's the main function for this matrix
+                        multiplication example, with some timing code
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-cpp"><span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;iostream&gt;</span>
+                    <div class="org-src-container">
+                        <pre
+                            class="src src-cpp"
+                        ><span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;iostream&gt;</span>
 <span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;chrono&gt;</span>
 <span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;cuda_runtime.h&gt;</span>
 
@@ -432,7 +774,7 @@ Now here's the main function for this matrix multiplication example, with some t
 
     <span style="color: #656565;">// </span><span style="color: #757575;">Define grid and block dimensions</span>
     <span style="color: #cd7542;">dim3</span> <span style="color: #baba36;">blockDim</span>(16, 16);
-    <span style="color: #cd7542;">dim3</span> <span style="color: #baba36;">gridDim</span>((N + blockDim.x - 1) / blockDim.x, 
+    <span style="color: #cd7542;">dim3</span> <span style="color: #baba36;">gridDim</span>((N + blockDim.x - 1) / blockDim.x,
                  (N + blockDim.y - 1) / blockDim.y);
 
     <span style="color: #656565;">// </span><span style="color: #757575;">GPU Matrix Multiplication</span>
@@ -470,62 +812,81 @@ Now here's the main function for this matrix multiplication example, with some t
 }
 
 </pre>
-</div>
-</div>
-</div>
+                    </div>
+                </div>
+            </div>
 
-<div id="outline-container-org6eee941" class="outline-2">
-<h2 id="org6eee941"><span class="section-number-2">7.</span> Results</h2>
-<div class="outline-text-2" id="text-7">
-<p>
-On my NVIDIA GeForce GTX 1060, this took 7ms, vs 7,281ms on CPU (Intel Xeon CPU 3 GHz):
-</p>
+            <div id="outline-container-org6eee941" class="outline-2">
+                <h2 id="org6eee941">
+                    <span class="section-number-2">7.</span> Results
+                </h2>
+                <div class="outline-text-2" id="text-7">
+                    <p>
+                        On my NVIDIA GeForce GTX 1060, this took 7ms, vs 7,281ms
+                        on CPU (Intel Xeon CPU 3 GHz):
+                    </p>
 
-<div class="org-src-container">
-<pre class="src src-sh">./matmul
+                    <div class="org-src-container">
+                        <pre class="src src-sh">
+./matmul
 Matrix size: 1024 x 1024
 CPU Time: 7281 ms
 GPU Time: 7 ms
 Maximum Error: 9.15527e-05
-</pre>
-</div>
+</pre
+                        >
+                    </div>
 
-<p>
-Hire us if you are interested in accelerating your software using your older NVIDIA GPUs, we don't use Python or
-PyTorch or any fancy deep learning frameworks. We use first-principles thinking to make C/C++ programs that offload
-paralellizable work to the GPU device.
-</p>
+                    <p>
+                        Hire us if you are interested in accelerating your
+                        software using your older NVIDIA GPUs, we don't use
+                        Python or PyTorch or any fancy deep learning frameworks.
+                        We use first-principles thinking to make C/C++ programs
+                        that offload paralellizable work to the GPU device.
+                    </p>
 
-<p>
-If you are interested in hiring a team of experienced CUDA C++ developers, reach out to <a href="mailto:tobi@defini.dev">tobi@defini.dev</a>
-</p>
-</div>
-</div>
+                    <p>
+                        If you are interested in hiring a team of experienced
+                        CUDA C++ developers, reach out to
+                        <a href="mailto:tobi@defini.dev">tobi@defini.dev</a>
+                    </p>
+                </div>
+            </div>
 
-<div id="outline-container-orgf335919" class="outline-2">
-<h2 id="orgf335919"><span class="section-number-2">8.</span> Appendix</h2>
-<div class="outline-text-2" id="text-8">
-</div>
-<div id="outline-container-orgf06278e" class="outline-3">
-<h3 id="orgf06278e"><span class="section-number-3">8.1.</span> Imports</h3>
-<div class="outline-text-3" id="text-8-1">
-<div class="org-src-container">
-<pre class="src src-cpp" id="org62c3bba"><span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;iostream&gt;</span>
+            <div id="outline-container-orgf335919" class="outline-2">
+                <h2 id="orgf335919">
+                    <span class="section-number-2">8.</span> Appendix
+                </h2>
+                <div class="outline-text-2" id="text-8"></div>
+                <div id="outline-container-orgf06278e" class="outline-3">
+                    <h3 id="orgf06278e">
+                        <span class="section-number-3">8.1.</span> Imports
+                    </h3>
+                    <div class="outline-text-3" id="text-8-1">
+                        <div class="org-src-container">
+                            <pre
+                                class="src src-cpp"
+                                id="org62c3bba"
+                            ><span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;iostream&gt;</span>
 <span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;chrono&gt;</span>
 <span style="color: #dF9522;">#include</span> <span style="color: #bdbc61;">&lt;cuda_runtime.h&gt;</span>
 
 <span style="color: #656565;">// </span><span style="color: #757575;">Matrix dimensions</span>
 <span style="color: #5180b3;">const</span> <span style="color: #cd7542;">int</span> <span style="color: #baba36;">N</span> = 1024;  <span style="color: #656565;">// </span><span style="color: #757575;">Matrix size N x N</span>
 </pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div id="postamble" class="status">
-<p class="author">Author: Tobi Lehman</p>
-<p class="date">Created: 2025-01-26 Sun 19:55</p>
-<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
-</div>
-</body>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="postamble" class="status">
+            <p class="author">Author: Tobi Lehman</p>
+            <p class="date">Created: 2025-01-26 Sun 19:55</p>
+            <p class="validation">
+                <a href="https://validator.w3.org/check?uri=referer"
+                    >Validate</a
+                >
+            </p>
+        </div>
+    </body>
 </html>
